@@ -28,3 +28,4 @@ hs_err_pid*
 /.idea/
 *.properties
 /profession/config.py
+/profession/analytics/migrations/
