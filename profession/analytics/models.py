@@ -1,6 +1,9 @@
+import csv
+from datetime import datetime
+
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, post_save
 from django.dispatch import receiver
 
 
@@ -21,6 +24,38 @@ def records_delete(sender, instance, **kwargs):
     instance.skills_csv.delete(False)
 
 
+@receiver(post_save, sender=Records)
+def records_save(sender, instance, **kwargs):
+    print('начинаю забивать бд ')
+    skills_path = instance.skills_csv.path
+    with open(skills_path, 'r', encoding='utf-8') as f:
+        reader = csv.reader(f)
+        next(reader)
+        for row in reader:
+            s_rec = RecordsWSkills()
+            s_rec.name = row[0]
+            s_rec.skills = row[1]
+            s_rec.salary_from = row[2]
+            s_rec.salary_to = row[3]
+            s_rec.salary_currency = row[4]
+            s_rec.published_at = datetime.strptime(row[5], '%Y-%m-%dT%H:%M:%S%z')
+            s_rec.save()
+
+    city_path = instance.cities_csv.path
+    with open(city_path, 'r', encoding='utf-8') as f:
+        reader = csv.reader(f)
+        next(reader)
+        for row in reader:
+            c_rec = RecordsWCities()
+            c_rec.name = row[0]
+            c_rec.salary_from = row[1]
+            c_rec.salary_to = row[2]
+            c_rec.salary_currency = row[3]
+            c_rec.area_name = row[4]
+            c_rec.published_at = datetime.strptime(row[5], '%Y-%m-%dT%H:%M:%S%z')
+            c_rec.save()
+
+
 class RecordsWSkills(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')
     skills = models.CharField(max_length=500, verbose_name='Навыки')
@@ -33,8 +68,11 @@ class RecordsWSkills(models.Model):
         verbose_name = 'Запись с навыками'
         verbose_name_plural = 'Записи с навыками'
 
+    def __str__(self):
+        return f"Запись: №{self.pk}"
 
-# '%Y-%m-%dT%H:%M:%S%z'
+
+#
 
 class RecordsWCities(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')
@@ -47,3 +85,6 @@ class RecordsWCities(models.Model):
     class Meta:
         verbose_name = 'Запись с городами'
         verbose_name_plural = 'Записи с городами'
+
+    def __str__(self):
+        return f"Запись: №{self.pk}"
