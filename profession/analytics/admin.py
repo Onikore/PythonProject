@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from analytics.models import RecordsWCities, RecordsWSkills, Records
+
+admin.site.register([RecordsWSkills, RecordsWCities,Records])
