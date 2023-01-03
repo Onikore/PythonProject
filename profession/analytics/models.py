@@ -26,7 +26,6 @@ def records_delete(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Records)
 def records_save(sender, instance, **kwargs):
-    print('начинаю забивать бд ')
     skills_path = instance.skills_csv.path
     with open(skills_path, 'r', encoding='utf-8') as f:
         reader = csv.reader(f)

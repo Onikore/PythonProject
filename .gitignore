@@ -21,10 +21,11 @@
 *.zip
 *.tar.gz
 *.rar
+*.csv
+*.djcache
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-*.csv
 /.idea/
 *.properties
 /profession/config.py

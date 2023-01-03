@@ -2,7 +2,7 @@
 
 
 {% block title %}
-    Востребованность
+    География
 {% endblock %}
 
 {% block main %}
@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Динамика количества вакансий по годам по выбранной профессии</h1>
+            <h1 class="h2">Уровень зарплат по городам (в порядке убывания).</h1>
         </div>
             <canvas class="my-4 w-100 chartjs-render-monitor" id="myChart" width="871" height="367"
                     style="display: block; width: 871px; height: 367px;"></canvas>
@@ -25,15 +25,15 @@
             <table class="table table-striped table-sm">
                 <thead>
                 <tr>
-                    <th>Год</th>
-                    <th>Количество вакансий</th>
+                    <th>Город</th>
+                    <th>Уровень зарплат</th>
                 </tr>
                 </thead>
                 <tbody id="tableBody">
                 {% for i in ctx %}
                     <tr>
-                        <td class="key">{{ i.year }}</td>
-                        <td class="value">{{ i.count }}</td>
+                        <td class="key">{{ i.city }}</td>
+                        <td class="value">{{ i.vac }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

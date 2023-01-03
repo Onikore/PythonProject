@@ -1,8 +1,11 @@
-function getValues(className) {
+function getValues(className, textMode) {
     var res = [];
     var z = document.getElementsByClassName(className);
     for (let i = 0; i < z.length; i++) {
-        res.push(parseFloat(z[i].innerText));
+        var temp = z[i].innerText;
+        textMode
+            ? res.push(temp)
+            : res.push(parseFloat(temp));
     }
     return res;
 }
@@ -14,9 +17,9 @@ function getValues(className) {
     var myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: getValues('key'),
+            labels: getValues('key', true),
             datasets: [{
-                data: getValues('value'),
+                data: getValues('value', false),
                 lineTension: 0,
                 backgroundColor: 'transparent',
                 borderColor: '#007bff',
