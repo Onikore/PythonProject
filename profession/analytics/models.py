@@ -1,6 +1,4 @@
-import csv
-from datetime import datetime
-
+import pandas as pd
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.signals import pre_delete, post_save
@@ -22,37 +20,32 @@ class Records(models.Model):
 def records_delete(sender, instance, **kwargs):
     instance.cities_csv.delete(False)
     instance.skills_csv.delete(False)
+    RecordsWCities.objects.all().delete()
+    RecordsWSkills.objects.all().delete()
 
 
 @receiver(post_save, sender=Records)
 def records_save(sender, instance, **kwargs):
     skills_path = instance.skills_csv.path
-    with open(skills_path, 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
-        for row in reader:
-            s_rec = RecordsWSkills()
-            s_rec.name = row[0]
-            s_rec.skills = row[1]
-            s_rec.salary_from = row[2]
-            s_rec.salary_to = row[3]
-            s_rec.salary_currency = row[4]
-            s_rec.published_at = datetime.strptime(row[5], '%Y-%m-%dT%H:%M:%S%z')
-            s_rec.save()
-
+    df = pd.read_csv(skills_path, parse_dates=['published_at'], sep=',', infer_datetime_format=True)
+    RecordsWSkills.objects.bulk_create(
+        RecordsWSkills(name=row[0],
+                       skills=row[1],
+                       salary_from=row[2],
+                       salary_to=row[3],
+                       salary_currency=row[4],
+                       published_at=row[5]) for _, row in df.iterrows()
+    )
     city_path = instance.cities_csv.path
-    with open(city_path, 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)
-        for row in reader:
-            c_rec = RecordsWCities()
-            c_rec.name = row[0]
-            c_rec.salary_from = row[1]
-            c_rec.salary_to = row[2]
-            c_rec.salary_currency = row[3]
-            c_rec.area_name = row[4]
-            c_rec.published_at = datetime.strptime(row[5], '%Y-%m-%dT%H:%M:%S%z')
-            c_rec.save()
+    df = pd.read_csv(city_path, parse_dates=['published_at'], sep=',', infer_datetime_format=True)
+    RecordsWCities.objects.bulk_create(
+        RecordsWCities(name=row[0],
+                       salary_from=row[1],
+                       salary_to=row[2],
+                       salary_currency=row[3],
+                       area_name=row[4],
+                       published_at=row[5]) for _, row in df.iterrows()
+    )
 
 
 class RecordsWSkills(models.Model):
@@ -71,7 +64,6 @@ class RecordsWSkills(models.Model):
         return f"Запись: №{self.pk}"
 
 
-#
 
 class RecordsWCities(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')

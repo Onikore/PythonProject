@@ -5,26 +5,24 @@ from django.shortcuts import render
 
 
 # UTILS
-def prepare_df():
+def prepare_df(query, pattern=False):
     with sqlite3.connect('db.sqlite3') as conn:
-        df = pd.read_sql_query("SELECT * FROM analytics_recordswcities", conn, parse_dates=['published_at'])
+        df = pd.read_sql_query(query, conn, parse_dates=['published_at'])
+        if pattern:
+            df = df.loc[df['name'].str.contains('|'.join(PATTERN), case=False)]
         df['year'] = pd.to_datetime(df['published_at'], utc=True).dt.year
         return df
 
 
 def demand_task_2_4_helper(pattern=False):
-    df = prepare_df()
-    if pattern:
-        df = df.loc[df['name'].str.contains('|'.join(PATTERN), case=False)]
+    df = prepare_df("SELECT name,published_at FROM analytics_recordswcities", pattern)
     df1 = df[['year', 'name']].groupby('year').count()
     df1 = df1.sort_values(by='year', ascending=False)
     return df1
 
 
 def demand_task_1_3_helper(pattern=False):
-    df = prepare_df()
-    if pattern:
-        df = df.loc[df['name'].str.contains('|'.join(PATTERN), case=False)]
+    df = prepare_df("SELECT name,salary_from,salary_to,published_at FROM analytics_recordswcities", pattern)
     df1 = df[['year', 'salary_from', 'salary_to']].groupby('year').mean().round()
     df1['salary'] = (df1['salary_from'] + df1['salary_to']) / 2
     df1 = df1.sort_values(by='year', ascending=False)
@@ -74,9 +72,8 @@ def demand_task_4(request):
 
 #  ГЕОГРАФИЯ
 def geography_task_1(request):
-    df = prepare_df()
-    df1 = df.loc[df['name'].str.contains('|'.join(PATTERN), case=False)]
-    df1 = df1[['area_name', 'salary_from', 'salary_to']].groupby('area_name')
+    df = prepare_df("SELECT name,salary_from,salary_to,area_name,published_at FROM analytics_recordswcities", True)
+    df1 = df[['area_name', 'salary_from', 'salary_to']].groupby('area_name')
     df1 = df1.mean().round()
     df1['salary'] = (df1['salary_from'] + df1['salary_to']) / 2
     df1 = df1.sort_values(by='salary', ascending=False).head(10)
@@ -86,9 +83,8 @@ def geography_task_1(request):
 
 
 def geography_task_2(request):
-    df = prepare_df()
-    df1 = df.loc[df['name'].str.contains('|'.join(PATTERN), case=False)]
-    df1 = df1[['area_name', 'name']].groupby('area_name').count()
+    df = prepare_df("SELECT name,area_name,published_at FROM analytics_recordswcities", True)
+    df1 = df[['area_name', 'name']].groupby('area_name').count()
     df1['name'] = (df1['name'] / df1['name'].sum()) * 100
     df1 = df1.loc[df1['name'] >= 1]
     df1 = df1.sort_values(by='name', ascending=False).round()
@@ -99,6 +95,9 @@ def geography_task_2(request):
 
 #  НАВЫКИ
 def skills(request):
+    df = prepare_df("SELECT skills, published_at FROM analytics_recordswskills")
+    df1 = df[['skills', 'year']].groupby('year')
+    print(dict(list(df1))[2016])
     return render(request, 'analytics/skills.html')
 
 
