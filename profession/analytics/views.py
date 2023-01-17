@@ -128,18 +128,20 @@ def recent(request):
         specs = dict(requests.request('GET', url=url + f'/{i["id"]}').json())
         desc = specs['description']
         desc = re.sub('<[^>]*>', '', desc)
-        desc = re.sub('&quot;', '', desc)
-        vac['description'] = desc.replace('\\',' ')
+        vac['description'] = desc.replace('\\', ' ') \
+                                 .replace('&amp;', '&') \
+                                 .replace('&quot;', '"') \
+                                 .replace('&lt;', '<') \
+                                 .replace('&gt;', '>')
         vac['skills'] = None if specs['key_skills'] == [] else ', '.join([i['name'] for i in specs['key_skills']])
         vac['employer'] = i['employer']['name']
         vac['salary_from'] = i['salary']['from']
         vac['salary_to'] = i['salary']['to']
         vac['area'] = i['area']['name']
-        vac['published_at'] = datetime.strptime(i['published_at'], '%Y-%m-%dT%H:%M:%S%z').strftime('%Y-%m-%d %H:%M')
+        vac['published_at'] = datetime.strptime(i['published_at'], '%Y-%m-%dT%H:%M:%S%z').strftime('%d.%m.%Y %H:%M')
         ctx.append(vac)
         id += 1
 
-    # sort ctx by hours and minutes in published_at asc
     ctx = sorted(
         ctx, key=lambda x: (
             int(x['published_at'].split(' ')[1].split(':')[0]),

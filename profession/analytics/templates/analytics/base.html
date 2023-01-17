@@ -43,13 +43,16 @@
                             Востребованность
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{% url 'demand_task_1' %}">Динамика уровня зарплат по годам.</a>
+                            <a class="dropdown-item" href="{% url 'demand_task_1' %}">Динамика уровня зарплат по
+                                годам.</a>
                             <a class="dropdown-item" href="{% url 'demand_task_2' %}">Динамика количества вакансий по
                                 годам.</a>
-                            <a class="dropdown-item" href="{% url 'demand_task_3' %}">Динамика уровня зарплат по годам для
+                            <a class="dropdown-item" href="{% url 'demand_task_3' %}">Динамика уровня зарплат по годам
+                                для
                                 выбранной
                                 профессии.</a>
-                            <a class="dropdown-item" href="{% url 'demand_task_4' %}">Динамика количества вакансий по годам для
+                            <a class="dropdown-item" href="{% url 'demand_task_4' %}">Динамика количества вакансий по
+                                годам для
                                 выбранной
                                 профессии.</a>
                         </div>
@@ -65,9 +68,11 @@
                             География
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{% url 'geography_task_1' %}">Уровень зарплат по городам (в порядке
+                            <a class="dropdown-item" href="{% url 'geography_task_1' %}">Уровень зарплат по городам (в
+                                порядке
                                 убывания).</a>
-                            <a class="dropdown-item" href="{% url 'geography_task_2' %}">Доля вакансий по городам (в порядке
+                            <a class="dropdown-item" href="{% url 'geography_task_2' %}">Доля вакансий по городам (в
+                                порядке
                                 убывания).</a>
                         </div>
                     </li>
@@ -94,18 +99,12 @@
             </div>
         </nav>
         {% block main %} {% endblock %}
+        <div><br></div>
     </div>
 </div>
 
-<footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 mt-auto border-top">
-    <p class="col-md-4 mb-0 text-muted px-5">© 2022 Гришин Дмитрий Александрович РИ-210933</p>
-    <ul class="nav col-md-4 justify-content-center">
-        <li class="nav-item"><a href="{% url 'index' %}" class="nav-link px-2 text-muted">Главная</a></li>
-        <li class="nav-item"><a href="{% url 'demand_task_1' %}" class="nav-link px-2 text-muted">Востребованность</a></li>
-        <li class="nav-item"><a href="{% url 'geography_task_1' %}" class="nav-link px-2 text-muted">География</a></li>
-        <li class="nav-item"><a href="{% url 'skills' %}" class="nav-link px-2 text-muted">Навыки</a></li>
-        <li class="nav-item"><a href="{% url 'recent' %}" class="nav-link px-2 text-muted">Последние вакансии</a></li>
-    </ul>
+<footer class="align-items-center py-3 my-0 mt-auto border-top">
+    <p class="mb-0 text-muted px-5" style="text-align: center">© 2022 Гришин Дмитрий Александрович РИ-210933</p>
 </footer>
 
 

@@ -8,25 +8,35 @@
     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
         <div class="row mb-2">
             {% for i in ctx %}
-                <div class="col-md-6">
-                    <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-                        <div class="col p-4 d-flex flex-column position-static">
-                            <h3 class="mb-0">{{ i.name }}</h3>
+                <div class="card mt-2 px-0">
+                    <div class="card-header" id="heading{{ i.id }}">
+                        <h5 class="mb-0">
+                            <a class="nav-link" data-toggle="collapse" data-target="#collapseOne{{ i.id }}"
+                                    aria-expanded="true" aria-controls="collapseOne">
+                                {{ i.name }}
+                            </a>
+                        </h5>
+                    </div>
+
+                    <div id="collapseOne{{ i.id }}" class="collapse show" aria-labelledby="heading{{ i.id }}"
+                         data-parent="#accordion">
+                        <div class="card-body">
                             {% if i.salary_to is not None %}
-                                <strong class="mb-1 text-muted">{{ i.salary_from }} - {{ i.salary_to }}
-                                    руб.</strong>
+                                <div class="mb-1 text-muted">Зарплата: {{ i.salary_from }} - {{ i.salary_to }} руб.</div>
                             {% else %}
-                                <strong class="mb-1 text-muted">{{ i.salary_from }} руб.</strong>
+                                <div class="mb-1 text-muted">Зарплата: {{ i.salary_from }} руб.</div>
                             {% endif %}
-                            <div class="mb-1 text-muted">{{ i.area }}</div>
-                            <div class="mb-1 text-muted">{{ i.employer }}</div>
-                            <div class="mb-1 text-muted">{{ i.published_at }}</div>
+
+                            <div class="mb-1 text-muted">Регион: {{ i.area }}</div>
+                            <div class="mb-1 text-muted">Компания: {{ i.employer }}</div>
+                            <div class="mb-1 text-muted">Время публикации: {{ i.published_at }}</div>
+
                             {% if i.skills is not None and i.skills is not "" %}
                                 <p class="mb-1 text-muted">Необходимые навыки: {{ i.skills }}</p><br>
                             {% else %}
                                 <p class="mb-1 text-muted">Навыки не указаны</p><br>
                             {% endif %}
-                            <p class="card-text mb-auto">{{ i.description }}</p>
+                            <p class="card-text mb-auto">Описание вакансии: {{ i.description }}</p>
                         </div>
                     </div>
                 </div>

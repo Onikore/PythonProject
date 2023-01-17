@@ -1,3 +1,5 @@
+import datetime
+
 import pandas as pd
 from django.core.validators import FileExtensionValidator
 from django.db import models
@@ -26,26 +28,54 @@ def records_delete(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Records)
 def records_save(sender, instance, **kwargs):
+    print(f'первый {datetime.datetime.now()}')
     skills_path = instance.skills_csv.path
-    df = pd.read_csv(skills_path, parse_dates=['published_at'], sep=',', infer_datetime_format=True)
-    RecordsWSkills.objects.bulk_create(
-        RecordsWSkills(name=row[0],
-                       skills=row[1],
-                       salary_from=row[2],
-                       salary_to=row[3],
-                       salary_currency=row[4],
-                       published_at=row[5]) for _, row in df.iterrows()
-    )
+    chunk = []
+    for _, i in pd.read_csv(skills_path, parse_dates=['published_at'], sep=',', infer_datetime_format=True).iterrows():
+        chunk.append(RecordsWSkills(name=i[0],
+                                    skills=i[1],
+                                    salary_from=i[2],
+                                    salary_to=i[3],
+                                    salary_currency=i[4],
+                                    published_at=i[5]
+                                    ))
+        if len(chunk) > 50000:
+            RecordsWSkills.objects.bulk_create(chunk)
+            chunk = []
+    RecordsWSkills.objects.bulk_create(chunk)
+    chunk = []
+
+    # RecordsWSkills.objects.bulk_create(
+    #     RecordsWSkills(name=row[0],
+    #                    skills=row[1],
+    #                    salary_from=row[2],
+    #                    salary_to=row[3],
+    #                    salary_currency=row[4],
+    #                    published_at=row[5]) for _, row in df.iterrows()
+    # )
+
+    print(f'второй {datetime.datetime.now()}')
     city_path = instance.cities_csv.path
-    df = pd.read_csv(city_path, parse_dates=['published_at'], sep=',', infer_datetime_format=True)
-    RecordsWCities.objects.bulk_create(
-        RecordsWCities(name=row[0],
-                       salary_from=row[1],
-                       salary_to=row[2],
-                       salary_currency=row[3],
-                       area_name=row[4],
-                       published_at=row[5]) for _, row in df.iterrows()
-    )
+    for _, i in pd.read_csv(city_path, parse_dates=['published_at'], sep=',', infer_datetime_format=True).iterrows():
+        chunk.append(RecordsWCities(name=i[0],
+                                    salary_from=i[1],
+                                    salary_to=i[2],
+                                    salary_currency=i[3],
+                                    area_name=i[4],
+                                    published_at=i[5]))
+        if len(chunk) == 50000:
+            RecordsWCities.objects.bulk_create(chunk)
+            chunk = []
+    RecordsWCities.objects.bulk_create(chunk)
+    print(f'конец {datetime.datetime.now()}')
+    # RecordsWCities.objects.bulk_create(
+    #     RecordsWCities(name=row[0],
+    #                    salary_from=row[1],
+    #                    salary_to=row[2],
+    #                    salary_currency=row[3],
+    #                    area_name=row[4],
+    #                    published_at=row[5]) for _, row in df.iterrows()
+    # )
 
 
 class RecordsWSkills(models.Model):
