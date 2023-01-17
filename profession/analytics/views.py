@@ -79,7 +79,7 @@ def geography_task_1(request):
     df1 = df1.sort_values(by='salary', ascending=False).head(10)
     res = df1.to_dict()['salary']
     ctx = [{'city': i, 'vac': res[i]} for i in res]
-    return render(request, 'analytics/geography/geography_task_1.html', {'ctx': ctx})
+    return render(request, 'analytics/geography/task_1.html', {'ctx': ctx})
 
 
 def geography_task_2(request):
@@ -90,17 +90,62 @@ def geography_task_2(request):
     df1 = df1.sort_values(by='name', ascending=False).round()
     res = df1.to_dict()['name']
     ctx = [{'city': i, 'salary': res[i]} for i in res]
-    return render(request, 'analytics/geography/geography_task_2.html', {'ctx': ctx})
+    return render(request, 'analytics/geography/task_2.html', {'ctx': ctx})
 
 
 #  НАВЫКИ
 def skills(request):
     df = prepare_df("SELECT skills, published_at FROM analytics_recordswskills")
     df1 = df[['skills', 'year']].groupby('year')
-    print(dict(list(df1))[2016])
-    return render(request, 'analytics/skills.html')
+    ctx = []
+    for i in df1.groups.keys():
+        lst = df1.get_group(i)['skills'].str.split('|').explode().value_counts().head(10)
+        ctx.append({'year': i, 'skills': lst.to_dict()})
+    return render(request, 'analytics/skills.html', {'ctx': ctx})
 
 
 #  ПОСЛЕДНИЕ ВАКАНСИИ
 def recent(request):
-    return render(request, 'analytics/recent.html')
+    import requests
+    import re
+    from datetime import datetime
+
+    url = "https://api.hh.ru/vacancies"
+
+    payload = {'text': ' OR '.join(PATTERN),
+               'page': 1,
+               'per_page': 10,
+               'only_with_salary': True,
+               'applicant_comments_order': 'creation_time_asc'}
+
+    response = dict(requests.request('GET', url=url, data=payload).json())['items']
+    ctx = []
+    id = 1
+    for i in response:
+        vac = {}
+        vac['id'] = id
+        vac['name'] = i['name']
+        specs = dict(requests.request('GET', url=url + f'/{i["id"]}').json())
+        desc = specs['description']
+        desc = re.sub('<[^>]*>', '', desc)
+        desc = re.sub('&quot;', '', desc)
+        vac['description'] = desc.replace('\\',' ')
+        vac['skills'] = None if specs['key_skills'] == [] else ', '.join([i['name'] for i in specs['key_skills']])
+        vac['employer'] = i['employer']['name']
+        vac['salary_from'] = i['salary']['from']
+        vac['salary_to'] = i['salary']['to']
+        vac['area'] = i['area']['name']
+        vac['published_at'] = datetime.strptime(i['published_at'], '%Y-%m-%dT%H:%M:%S%z').strftime('%Y-%m-%d %H:%M')
+        ctx.append(vac)
+        id += 1
+
+    # sort ctx by hours and minutes in published_at asc
+    ctx = sorted(
+        ctx, key=lambda x: (
+            int(x['published_at'].split(' ')[1].split(':')[0]),
+            int(x['published_at'].split(' ')[1].split(':')[1])
+        ),
+        reverse=True
+    )
+
+    return render(request, 'analytics/recent.html', {'ctx': ctx})

@@ -64,7 +64,6 @@ class RecordsWSkills(models.Model):
         return f"Запись: №{self.pk}"
 
 
-
 class RecordsWCities(models.Model):
     name = models.CharField(max_length=200, verbose_name='Название')
     salary_from = models.FloatField(verbose_name='Зарплата от')

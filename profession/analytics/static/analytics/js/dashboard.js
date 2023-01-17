@@ -41,4 +41,3 @@ function getValues(className, textMode) {
         }
     })
 })()
-

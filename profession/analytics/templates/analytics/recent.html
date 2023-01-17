@@ -1,10 +1,37 @@
 {% extends 'analytics/base.html' %}
 
 {% block title %}
-Последние вакансии
+    Последние вакансии
 {% endblock %}
 
 {% block main %}
-
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="row mb-2">
+            {% for i in ctx %}
+                <div class="col-md-6">
+                    <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+                        <div class="col p-4 d-flex flex-column position-static">
+                            <h3 class="mb-0">{{ i.name }}</h3>
+                            {% if i.salary_to is not None %}
+                                <strong class="mb-1 text-muted">{{ i.salary_from }} - {{ i.salary_to }}
+                                    руб.</strong>
+                            {% else %}
+                                <strong class="mb-1 text-muted">{{ i.salary_from }} руб.</strong>
+                            {% endif %}
+                            <div class="mb-1 text-muted">{{ i.area }}</div>
+                            <div class="mb-1 text-muted">{{ i.employer }}</div>
+                            <div class="mb-1 text-muted">{{ i.published_at }}</div>
+                            {% if i.skills is not None and i.skills is not "" %}
+                                <p class="mb-1 text-muted">Необходимые навыки: {{ i.skills }}</p><br>
+                            {% else %}
+                                <p class="mb-1 text-muted">Навыки не указаны</p><br>
+                            {% endif %}
+                            <p class="card-text mb-auto">{{ i.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
 {% endblock %}
 
