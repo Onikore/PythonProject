@@ -84,7 +84,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'analytics\\static'),
+    os.path.join(BASE_DIR, 'analytics/static'),
 ]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -95,5 +95,5 @@ CACHES = {
         'LOCATION': os.path.join(BASE_DIR, 'cache'),
     }
 }
-
-CACHE_TIME = 60 * 5
+MIN_IN_SEC = 60
+CACHE_TIME = 60 * MIN_IN_SEC

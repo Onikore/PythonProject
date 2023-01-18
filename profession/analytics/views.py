@@ -1,46 +1,11 @@
-import sqlite3
-
-import pandas as pd
 from django.shortcuts import render
 
-
-# UTILS
-def prepare_df(query, pattern=False):
-    with sqlite3.connect('db.sqlite3') as conn:
-        df = pd.read_sql_query(query, conn, parse_dates=['published_at'])
-        if pattern:
-            df = df.loc[df['name'].str.contains('|'.join(PATTERN), case=False)]
-        df['year'] = pd.to_datetime(df['published_at'], utc=True).dt.year
-        return df
+from analytics.utils import demand_task_1_3_helper, demand_task_2_4_helper, prepare_df, PATTERN
 
 
-def demand_task_2_4_helper(pattern=False):
-    df = prepare_df("SELECT name,published_at FROM analytics_recordswcities", pattern)
-    df1 = df[['year', 'name']].groupby('year').count()
-    df1 = df1.sort_values(by='year', ascending=False)
-    return df1
-
-
-def demand_task_1_3_helper(pattern=False):
-    df = prepare_df("SELECT name,salary_from,salary_to,published_at FROM analytics_recordswcities", pattern)
-    df1 = df[['year', 'salary_from', 'salary_to']].groupby('year').mean().round()
-    df1['salary'] = (df1['salary_from'] + df1['salary_to']) / 2
-    df1 = df1.sort_values(by='year', ascending=False)
-    return df1
-
-
-PATTERN = ('system admin', 'сисадмин', 'сис админ',
-           'системный админ', 'администратор систем', 'системний адміністратор')
-
-
-# URLS
-
-#  ГЛАВНАЯ
 def index(request):
     return render(request, 'analytics/index.html')
 
-
-#  ВОСТРЕБОВАННОСТЬ
 
 def demand_task_1(request):
     df = demand_task_1_3_helper()
@@ -70,7 +35,6 @@ def demand_task_4(request):
     return render(request, 'analytics/demand/task_4.html', context={'ctx': ctx})
 
 
-#  ГЕОГРАФИЯ
 def geography_task_1(request):
     df = prepare_df("SELECT name,salary_from,salary_to,area_name,published_at FROM analytics_recordswcities", True)
     df1 = df[['area_name', 'salary_from', 'salary_to']].groupby('area_name')
@@ -104,7 +68,6 @@ def skills(request):
     return render(request, 'analytics/skills.html', {'ctx': ctx})
 
 
-#  ПОСЛЕДНИЕ ВАКАНСИИ
 def recent(request):
     import requests
     import re
@@ -120,19 +83,20 @@ def recent(request):
 
     response = dict(requests.request('GET', url=url, data=payload).json())['items']
     ctx = []
-    id = 1
+    vac_id = 1
     for i in response:
-        vac = {}
-        vac['id'] = id
-        vac['name'] = i['name']
-        specs = dict(requests.request('GET', url=url + f'/{i["id"]}').json())
+        vac = {
+            'vac_id': vac_id,
+            'name': i['name']
+        }
+        specs = dict(requests.request('GET', url=url + f'/{i["vac_id"]}').json())
         desc = specs['description']
         desc = re.sub('<[^>]*>', '', desc)
         vac['description'] = desc.replace('\\', ' ') \
-                                 .replace('&amp;', '&') \
-                                 .replace('&quot;', '"') \
-                                 .replace('&lt;', '<') \
-                                 .replace('&gt;', '>')
+            .replace('&amp;', '&') \
+            .replace('&quot;', '"') \
+            .replace('&lt;', '<') \
+            .replace('&gt;', '>')
         vac['skills'] = None if specs['key_skills'] == [] else ', '.join([i['name'] for i in specs['key_skills']])
         vac['employer'] = i['employer']['name']
         vac['salary_from'] = i['salary']['from']
@@ -140,7 +104,7 @@ def recent(request):
         vac['area'] = i['area']['name']
         vac['published_at'] = datetime.strptime(i['published_at'], '%Y-%m-%dT%H:%M:%S%z').strftime('%d.%m.%Y %H:%M')
         ctx.append(vac)
-        id += 1
+        vac_id += 1
 
     ctx = sorted(
         ctx, key=lambda x: (
